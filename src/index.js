@@ -4,6 +4,7 @@
  * @author Chris Ziogas <chris@ebakus.com>
  * @date 2018
  */
+import '@babel/polyfill'
 
 import RLP from 'eth-lib/lib/rlp'
 import Bytes from 'eth-lib/lib/bytes'

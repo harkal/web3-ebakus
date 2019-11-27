@@ -109,7 +109,7 @@ const clientConfig = {
     fs: 'empty',
   },
   entry: {
-    'web3-ebakus': ['@babel/polyfill', './src/browser.js'],
+    'web3-ebakus': './src/browser.js',
   },
   externals: [
     nodeExternals({
@@ -128,7 +128,7 @@ const clientConfig = {
 const serverConfig = {
   target: 'node',
   entry: {
-    'web3-ebakus': ['@babel/polyfill', './src/index.js'],
+    'web3-ebakus': './src/index.js',
   },
   externals: [
     nodeExternals({
