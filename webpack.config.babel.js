@@ -103,6 +103,23 @@ const baseConfig = {
   },
 }
 
+const browserConfig = {
+  target: 'web',
+  node: {
+    fs: 'empty',
+  },
+  entry: {
+    'web3-ebakus': './src/browser.js',
+  },
+  output: {
+    filename: '[name].browser.min.js',
+  },
+  devServer: {
+    contentBase: ['./example', './lib'],
+  },
+  optimization: getOptimization('web'),
+}
+
 const clientConfig = {
   target: 'web',
   node: {
@@ -111,14 +128,14 @@ const clientConfig = {
   entry: {
     'web3-ebakus': './src/browser.js',
   },
+  output: {
+    filename: '[name].browser.esm.js',
+  },
   externals: [
     nodeExternals({
       whitelist: ['web3'],
     }),
   ],
-  output: {
-    filename: '[name].browser.js',
-  },
   devServer: {
     contentBase: ['./example', './lib'],
   },
@@ -129,6 +146,9 @@ const serverConfig = {
   target: 'node',
   entry: {
     'web3-ebakus': './src/index.js',
+  },
+  output: {
+    filename: '[name].node.js',
   },
   externals: [
     nodeExternals({
@@ -144,6 +164,7 @@ const serverConfig = {
 }
 
 module.exports = [
+  merge(baseConfig, browserConfig),
   merge(baseConfig, clientConfig),
   merge(baseConfig, serverConfig),
 ]
