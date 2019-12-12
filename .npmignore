@@ -4,3 +4,4 @@ webpack.config.babel.js
 .editorconfig
 .gitignore
 .prettierrc
+.prettierignore
