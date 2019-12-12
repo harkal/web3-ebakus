@@ -18,7 +18,7 @@ Build running the following from the root folder of the repository:
 npm run-script build
 ```
 
-Then include `lib/web3-ebakus.browser.js` in your html file.
+Then include `lib/web3-ebakus.browser.min.js` in your html file.
 This will expose the `Web3Ebakus` object on the window object.
 
 ## Requirements
