@@ -7,14 +7,28 @@
     "type": "git",
     "url": "git+https://github.com/ebakus/web3-ebakus.git"
   },
-  "author": "Ebakus AG <chris@ebakus.com>",
+  "author": "Ebakus AG <hello@ebakus.com>",
   "license": "MIT",
-  "browser": "lib/web3-ebakus.browser.esm.js",
   "main": "lib/web3-ebakus.node.js",
-  "module": "src/index.js",
   "source": "src/index.js",
+  "module": "src/index.js",
+  "browser": "lib/web3-ebakus.browser.esm.js",
+  "unpkg": "lib/web3-ebakus.browser.min.js",
   "files": [
     "lib/*"
+  ],
+  "directories": {
+    "lib": "lib"
+  },
+  "bugs": {
+    "url": "https://github.com/ebakus/web3-ebakus/issues"
+  },
+  "keywords": [
+    "blockchain",
+    "ebakus",
+    "dapp",
+    "web3",
+    "pow"
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
@@ -79,17 +93,5 @@
       "git add"
     ]
   },
-  "browserslist": "> 1%, last 2 versions",
-  "bugs": {
-    "url": "https://github.com/ebakus/web3-ebakus/issues"
-  },
-  "directories": {
-    "lib": "lib"
-  },
-  "keywords": [
-    "blockchain",
-    "ebakus",
-    "dapp",
-    "web3"
-  ]
+  "browserslist": "> 1%, last 2 versions"
 }

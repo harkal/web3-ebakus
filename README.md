@@ -12,7 +12,13 @@ npm install --save web3-ebakus
 
 ### In the Browser
 
-Build running the following from the root folder of the repository:
+Load it from CDN:
+
+```html
+<script src="https://unpkg.com/web3-ebakus" />
+```
+
+or build running the following from the root folder of the repository:
 
 ```bash
 npm run-script build
