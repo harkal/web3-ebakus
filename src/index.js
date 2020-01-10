@@ -74,9 +74,9 @@ const ebakus = web3 => {
           tx.nonce = await web3.eth.getTransactionCount(tx.to)
         }
 
-        // if (!tx.gas) {
-        //   tx.gas = await  web3.eth.estimateGas(tx)
-        // }
+        if (!tx.gas) {
+          tx.gas = await web3.eth.estimateGas(tx)
+        }
 
         tx = web3.extend.formatters.inputCallFormatter(tx)
 
@@ -90,7 +90,7 @@ const ebakus = web3 => {
 
         const job = {
           hash: rlpEncoded,
-          targetDifficulty,
+          targetDifficulty: targetDifficulty * web3.utils.hexToNumber(tx.gas),
         }
 
         return new Promise(function(resolve, reject) {
