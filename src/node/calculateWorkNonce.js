@@ -1,5 +1,6 @@
 import clz from 'clz-buffer'
 import { keccak256 } from 'eth-lib/lib/hash'
+import { performance } from 'perf_hooks'
 import { parentPort } from 'worker_threads'
 
 const throttled = (delay, fn) => {
@@ -22,7 +23,20 @@ const mainThreadUpdate = throttled(500, currentWorkNonce => {
   })
 })
 
-function calculateWorkNonce(hash, targetDifficulty) {
+const benchmarkPoWCallsPerSecond = () => {
+  for (var t = performance.now(), i = 0; performance.now() - t < 1000; ++i) {
+    keccak256(
+      '0xdf8082520894f0109fc8df283027b6285cc889f5aa624eac1f55843b9aca008' + i
+    )
+  }
+
+  parentPort.postMessage({
+    cmd: 'finished',
+    callsPerSecond: i,
+  })
+}
+
+const calculateWorkNonce = (hash, targetDifficulty) => {
   let currentWorkNonce = 0
 
   let bits = Math.log2(targetDifficulty)
@@ -68,8 +82,13 @@ function calculateWorkNonce(hash, targetDifficulty) {
 }
 
 parentPort.on('message', data => {
-  const { hash, targetDifficulty } = data
-  calculateWorkNonce(hash, targetDifficulty)
+  const { hash, targetDifficulty, benchmark } = data
+
+  if (benchmark) {
+    benchmarkPoWCallsPerSecond()
+  } else {
+    calculateWorkNonce(hash, targetDifficulty)
+  }
 })
 
 parentPort.postMessage({
