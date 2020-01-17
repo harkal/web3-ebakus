@@ -13,8 +13,20 @@ const throttled = (delay, fn) => {
   }
 }
 
-onmessage = function(e) {
-  let { hash, targetDifficulty } = e.data
+const benchmarkPoWCallsPerSecond = () => {
+  for (var t = performance.now(), i = 0; performance.now() - t < 1000; ++i) {
+    keccak256(
+      '0xdf8082520894f0109fc8df283027b6285cc889f5aa624eac1f55843b9aca008' + i
+    )
+  }
+
+  postMessage({
+    cmd: 'finished',
+    callsPerSecond: i,
+  })
+}
+
+const calculateWorkNonce = (hash, targetDifficulty) => {
   let currentWorkNonce = 0
 
   const mainThreadUpdate = throttled(500, () => {
@@ -25,7 +37,7 @@ onmessage = function(e) {
     })
   })
 
-  function calculateWorkNonce() {
+  function calc() {
     let bits = Math.log2(targetDifficulty)
     bits = Math.ceil(bits)
     const target = bits
@@ -62,13 +74,23 @@ onmessage = function(e) {
     } while (bestBit <= target)
   }
 
-  calculateWorkNonce()
+  calc()
 
   // emit the final workNonce calculated for transaction
   postMessage({
     cmd: 'finished',
     workNonce: currentWorkNonce,
   })
+}
+
+onmessage = function(e) {
+  let { hash, targetDifficulty, benchmark } = e.data
+
+  if (benchmark) {
+    benchmarkPoWCallsPerSecond()
+  } else {
+    calculateWorkNonce(hash, targetDifficulty)
+  }
 }
 
 // emit to main thread that worker has finished loading

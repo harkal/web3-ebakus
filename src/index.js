@@ -15,6 +15,89 @@ import signTransaction, {
 import { wasmSupported } from './common/utils'
 import CalculateWorkNonceWorker from 'worker-loader?name=[name].[ext]&publicPath=./node_modules/web3-ebakus/lib/!./node/calculateWorkNonce.js'
 
+let _benchmarkCallsPerSecond
+
+const benchmarkWorkCallsPerSecond = callback => {
+  if (_benchmarkCallsPerSecond && _benchmarkCallsPerSecond > 0) {
+    return Promise.resolve(_benchmarkCallsPerSecond)
+  }
+
+  let error = false
+
+  callback = callback || (() => {})
+
+  if (!wasmSupported) {
+    error = new Error(
+      "Wasm is not supported by browser. PoW function can't load."
+    )
+
+    callback(error)
+    return Promise.reject(error)
+  }
+
+  const benchmarkCallsPerSecond = async () => {
+    let worker
+
+    try {
+      const job = {
+        benchmark: true,
+      }
+
+      return new Promise(function(resolve) {
+        worker = new CalculateWorkNonceWorker()
+
+        /**
+         * worker can emit the following payloads:
+         * 1. { cmd: 'ready' }
+         * 2. { cmd: 'finished', callsPerSecond: number }
+         */
+        worker.on('message', data => {
+          const { cmd, callsPerSecond } = data
+
+          switch (cmd) {
+            case 'ready': {
+              worker.postMessage(job)
+              break
+            }
+
+            case 'finished': {
+              worker.terminate()
+
+              _benchmarkCallsPerSecond = callsPerSecond
+
+              callback(null, callsPerSecond)
+              resolve(callsPerSecond)
+              break
+            }
+
+            default: {
+              console.warn('Unknown data from worker', e.data)
+            }
+          }
+        })
+
+        worker.on('error', e => {
+          throw e
+        })
+
+        worker.on('exit', exitCode => {
+          if (exitCode === 1) {
+            return null
+          }
+          const err = new Error(`Worker has stopped with code ${exitCode}`)
+          callback(err)
+          return Promise.reject(err)
+        })
+      })
+    } catch (err) {
+      callback(err)
+      return Promise.reject(err)
+    }
+  }
+
+  return Promise.resolve(benchmarkCallsPerSecond())
+}
+
 const ebakus = web3 => {
   /*
    * calculateWorkForTransaction is used for running the wanted Proof of Work
@@ -26,7 +109,6 @@ const ebakus = web3 => {
     ctrl,
     callback
   ) {
-    const _this = this
     let error = false
 
     callback = callback || (() => {})
@@ -156,6 +238,38 @@ const ebakus = web3 => {
     }
 
     return Promise.resolve(handleTx(tx))
+  }
+
+  web3.eth.estimatePoWTime = async function estimatePoWTime(
+    targetDifficulty = 2,
+    gas = 21000,
+    callback
+  ) {
+    if (!callback) {
+      var args = Array.prototype.slice.call(arguments)
+      if (typeof args[args.length - 1] === 'function') {
+        callback = args.pop()
+      }
+    }
+
+    callback = callback || (() => {})
+
+    try {
+      const benchmarkCallsPerSecond = await benchmarkWorkCallsPerSecond()
+
+      let bits = Math.log2(targetDifficulty * gas)
+      bits = Math.ceil(bits)
+
+      const estimatedTimeInSeconds = Number(
+        (((bits / benchmarkCallsPerSecond) * 10000) % 60).toFixed(2)
+      )
+
+      callback(null, estimatedTimeInSeconds)
+      return Promise.resolve(estimatedTimeInSeconds)
+    } catch (err) {
+      callback(err)
+      return Promise.reject(err)
+    }
   }
 
   // extend web3 eth methods

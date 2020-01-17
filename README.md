@@ -105,6 +105,22 @@ The `ctrlWorkForTransactionState` and `callback` parameters are optional.
 
 - `callback`: you can read more [here](https://web3js.readthedocs.io/en/1.0/callbacks-promises-events.html)
 
+### web3.eth.estimatePoWTime(targetDifficulty, gas, callback)
+
+The `estimatePoWTime` estimates how much time the current hardware will take for doing PoW based on target difficulty and transaction gas.
+
+```js
+web3.eth.suggestDifficulty(accountAddress).then(difficulty => {
+  web3.eth
+    .estimatePoWTime(difficulty, /* gas */ 100000)
+    .then(powTimeInSeconds => console.log(powTimeInSeconds))
+})
+```
+
+- `targetDifficulty`: this is the target difficulty to achieve so as transaction gets produced. (default = 2)
+- `gas`: this is the transaction gas. (default = 21000)
+- `callback`: you can read more [here](https://web3js.readthedocs.io/en/1.0/callbacks-promises-events.html)
+
 ### web3.db.select(contractAddress, tableName, whereCondition, orderByColumn, blockNumber)
 
 The `db.select` allows performing selects with conditions ordered by column name.
