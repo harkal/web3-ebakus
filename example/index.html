@@ -87,6 +87,13 @@
                     console.log('difficulty: ', difficulty);
                 })
         };
+
+        function estimatePoWTime() {
+            web3.eth.estimatePoWTime(2, 21000)
+                .then((res) => {
+                    console.log('estimatePoWTime: ', res)
+                })
+        };
     </script>
 </head>
 
@@ -101,6 +108,7 @@
             <button onclick="testPlain(true)">Calculate Work and kill worker after 3 seconds</button>
             <button onclick="testAccount()">Calculate Work for account</button>
             <button onclick="suggestDifficulty()">Get suggested difficulty</button>
+            <button onclick="estimatePoWTime()">Get estimated PoW time</button>
         </p>
     </div>
 </body>

@@ -16,6 +16,79 @@ import signTransaction, {
 } from './common/signTransaction'
 import { wasmSupported } from './common/utils'
 
+let _benchmarkCallsPerSecond
+
+const benchmarkWorkCallsPerSecond = callback => {
+  if (_benchmarkCallsPerSecond && _benchmarkCallsPerSecond > 0) {
+    return Promise.resolve(_benchmarkCallsPerSecond)
+  }
+
+  let error = false
+
+  callback = callback || (() => {})
+
+  if (!wasmSupported) {
+    error = new Error(
+      "Wasm is not supported by browser. PoW function can't load."
+    )
+
+    callback(error)
+    return Promise.reject(error)
+  }
+
+  const benchmarkCallsPerSecond = async () => {
+    let worker
+
+    try {
+      const job = {
+        benchmark: true,
+      }
+
+      return new Promise(function(resolve) {
+        worker = new Worker()
+
+        /**
+         * worker can emit the following payloads:
+         * 1. { cmd: 'ready' }
+         * 2. { cmd: 'finished', callsPerSecond: number }
+         */
+        worker.onmessage = function onMessage(e) {
+          const {
+            target: wrk,
+            data: { cmd, callsPerSecond },
+          } = e
+
+          switch (cmd) {
+            case 'ready': {
+              worker.postMessage(job)
+              break
+            }
+
+            case 'finished': {
+              wrk.terminate()
+
+              _benchmarkCallsPerSecond = callsPerSecond
+
+              callback(null, callsPerSecond)
+              resolve(callsPerSecond)
+              break
+            }
+
+            default: {
+              console.warn('Unknown data from worker', e.data)
+            }
+          }
+        }
+      })
+    } catch (err) {
+      callback(err)
+      return Promise.reject(err)
+    }
+  }
+
+  return Promise.resolve(benchmarkCallsPerSecond())
+}
+
 const ebakus = web3 => {
   /*
    * calculateWorkForTransaction is used for running the wanted Proof of Work
@@ -34,7 +107,7 @@ const ebakus = web3 => {
 
     if (!wasmSupported) {
       error = new Error(
-        "Wasm is not supported by browser. CryptoNight can't load."
+        "Wasm is not supported by browser. PoW function can't load."
       )
 
       callback(error)
@@ -141,13 +214,44 @@ const ebakus = web3 => {
           }
         })
       } catch (err) {
-        console.log('TCL: err', err)
         callback(err)
         return Promise.reject(err)
       }
     }
 
     return Promise.resolve(calculatePowNonce(tx))
+  }
+
+  web3.eth.estimatePoWTime = async function estimatePoWTime(
+    targetDifficulty = 2,
+    gas = 21000,
+    callback
+  ) {
+    if (!callback) {
+      var args = Array.prototype.slice.call(arguments)
+      if (typeof args[args.length - 1] === 'function') {
+        callback = args.pop()
+      }
+    }
+
+    callback = callback || (() => {})
+
+    try {
+      const benchmarkCallsPerSecond = await benchmarkWorkCallsPerSecond()
+
+      let bits = Math.log2(targetDifficulty * gas)
+      bits = Math.ceil(bits)
+
+      const estimatedTimeInSeconds = Number(
+        (((bits / benchmarkCallsPerSecond) * 10000) % 60).toFixed(2)
+      )
+
+      callback(null, estimatedTimeInSeconds)
+      return Promise.resolve(estimatedTimeInSeconds)
+    } catch (err) {
+      callback(err)
+      return Promise.reject(err)
+    }
   }
 
   // extend web3 eth methods
