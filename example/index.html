@@ -90,8 +90,8 @@
 
         function estimatePoWTime() {
             web3.eth.estimatePoWTime(2, 21000)
-                .then((res) => {
-                    console.log('estimatePoWTime: ', res)
+                .then((powTimeInSeconds) => {
+                    console.log('estimatePoWTime: ', powTimeInSeconds)
                 })
         };
     </script>
