@@ -67,13 +67,14 @@ const signTransaction = (tx, privateKey, callback) => {
     }
 
     try {
-      tx = web3.extend.formatters.inputCallFormatter(tx)
-
-      const transaction = tx
-      transaction.to = tx.to || '0x'
-      transaction.data = tx.data || '0x'
-      transaction.value = tx.value || '0x'
-      transaction.chainId = web3.utils.numberToHex(tx.chainId)
+      const transaction = web3.extend.formatters.inputCallFormatter({
+        ...tx,
+        gasPrice: '0', // web3.js passes gasPrice as a number, ebakus doesn't need it so it '0' it
+      })
+      transaction.to = transaction.to || '0x'
+      transaction.data = transaction.data || '0x'
+      transaction.value = transaction.value || '0x'
+      transaction.chainId = web3.utils.numberToHex(transaction.chainId)
 
       const rlpEncoded = RLP.encode([
         Bytes.fromNat(transaction.nonce),
