@@ -268,10 +268,11 @@ const ebakus = web3 => {
   })
 
   // keep ref to web3 original method
-  const superAddAccountFunctions = web3.eth.accounts._addAccountFunctions
+  const superAddAccountFunctions =
+    web3.eth.accounts.__proto__._addAccountFunctions
 
   // extend web3 accounts methods
-  web3.eth.accounts._addAccountFunctions = function(account) {
+  web3.eth.accounts.__proto__._addAccountFunctions = function(account) {
     const _this = this
 
     account = superAddAccountFunctions.call(_this, account)
