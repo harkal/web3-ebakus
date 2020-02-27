@@ -146,6 +146,10 @@ web3.db.select(contractAddress, tableName, whereCondition, orderByColumn, blockN
 
 The `db.next` returns the next result of the select performed through `web3.db.select()`.
 
+### web3.db.releaseIterator(iter)
+
+The `db.releaseIterator` should be called once, if not all iterator entries has been read using `db.next`, in order the iterator taken from `db.select` to be released.
+
 ### web3.db.get(contractAddress, tableName, whereCondition, orderByColumn, blockNumber)
 
 The `db.get` allows fetching a single item. Check for its params at `web3.db.select()`.

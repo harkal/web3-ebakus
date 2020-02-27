@@ -343,6 +343,12 @@ const ebakus = web3 => {
         params: 1,
         inputFormatter: [null],
       },
+      {
+        name: 'releaseIterator',
+        call: 'db_releaseIterator',
+        params: 1,
+        inputFormatter: [null],
+      },
     ],
   })
 
