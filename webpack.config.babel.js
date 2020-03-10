@@ -139,6 +139,11 @@ const clientConfig = {
   devServer: {
     contentBase: ['./example', './lib'],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.TARGET': JSON.stringify('web'),
+    }),
+  ],
   optimization: getOptimization('web'),
 }
 
@@ -159,6 +164,57 @@ const serverConfig = {
     new webpack.ProvidePlugin({
       Worker: ['worker_threads', 'Worker'],
     }),
+    new webpack.DefinePlugin({
+      'process.env.TARGET': JSON.stringify('node'),
+    }),
+  ],
+  optimization: getOptimization('node'),
+}
+
+const web3SubproviderClientConfig = {
+  target: 'web',
+  node: {
+    fs: 'empty',
+  },
+  entry: {
+    'web3-ebakus': './src/web3-subprovider.js',
+  },
+  output: {
+    filename: '[name].web3-subprovider.esm.js',
+  },
+  externals: [
+    nodeExternals({
+      whitelist: ['web3'],
+    }),
+  ],
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.TARGET': JSON.stringify('web'),
+    }),
+  ],
+  optimization: getOptimization('web'),
+}
+
+const web3SubproviderServerConfig = {
+  target: 'node',
+  entry: {
+    'web3-ebakus': './src/web3-subprovider.js',
+  },
+  output: {
+    filename: '[name].web3-subprovider.node.js',
+  },
+  externals: [
+    nodeExternals({
+      whitelist: ['web3', 'eth-lib'],
+    }),
+  ],
+  plugins: [
+    new webpack.ProvidePlugin({
+      Worker: ['worker_threads', 'Worker'],
+    }),
+    new webpack.DefinePlugin({
+      'process.env.TARGET': JSON.stringify('node'),
+    }),
   ],
   optimization: getOptimization('node'),
 }
@@ -167,4 +223,6 @@ module.exports = [
   merge(baseConfig, browserConfig),
   merge(baseConfig, clientConfig),
   merge(baseConfig, serverConfig),
+  merge(baseConfig, web3SubproviderClientConfig),
+  merge(baseConfig, web3SubproviderServerConfig),
 ]

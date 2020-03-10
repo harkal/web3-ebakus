@@ -48,6 +48,8 @@ const web3 = Web3Ebakus(new Web3())
 
 You can also have a look at the [example page](example/index.html).
 
+> Additionally you can use the library with [web3-provider-engine](https://github.com/MetaMask/web3-provider-engine). Check [this section](#usage-with-web3-provider-engine).
+
 ## Methods
 
 ### web3.eth.suggestDifficulty(accountAddress)
@@ -164,4 +166,27 @@ The `db.get` allows fetching a single item. Check for its params at `web3.db.sel
 web3.db
   .get(contractAddress, tableName, whereCondition, orderByColumn, blockNumber)
   .then(entry => console.log(entry))
+```
+
+## Usage with `web3-provider-engine`
+
+The `web3-ebakus` can be loaded as a subprovider of `web3-provider-engine`. For doing this you can load the subprovider from `web3-ebakus/lib/web3-ebakus.web3-subprovider.node.js` for targeting node.js or from `web3-ebakus/lib/web3-ebakus.web3-subprovider.esm.js` for targeting web. Check the following example code:
+
+```js
+const Web3 = require('web3')
+const ProviderEngine = require('web3-provider-engine')
+const Web3EbakusSubprovider = require('web3-ebakus/lib/web3-ebakus.web3-subprovider.node.js')
+
+const web3 = new Web3('https://rpc.ebakus-testnet.com')
+
+const engine = new ProviderEngine()
+
+const web3ebakus = new Web3EbakusSubprovider({ web3: web3 })
+engine.addProvider(web3ebakus)
+
+// ... add more providers as needed
+
+engine.start()
+
+web3.setProvider(engine)
 ```
