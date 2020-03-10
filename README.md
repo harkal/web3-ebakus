@@ -15,11 +15,7 @@ npm install --save web3-ebakus
 Load it from CDN:
 
 ```html
-<script src="https://unpkg.com/web3-ebakus" />
-```
-
-```
-<script src="https://unpkg.com/web3-ebakus@latest/lib/web3-ebakus.browser.min.js"></script>
+<script src="https://unpkg.com/web3-ebakus"></script>
 ```
 
 > You can find what is the latest version number of the library [here](https://www.npmjs.com/package/web3-ebakus). The script tag above to `unpkg.com` points to latest endpoint which does a redirect.
