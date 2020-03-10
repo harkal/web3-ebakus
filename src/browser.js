@@ -90,6 +90,10 @@ const benchmarkWorkCallsPerSecond = callback => {
 }
 
 const ebakus = web3 => {
+  if (!web3) {
+    throw new Error('No web3 object provided to web3-ebakus!')
+  }
+
   /*
    * calculateWorkForTransaction is used for running the wanted Proof of Work
    * for the transaction from the Ebakus blockchain
@@ -141,16 +145,19 @@ const ebakus = web3 => {
 
       try {
         if (!targetDifficulty) {
-          targetDifficulty = await web3.eth.suggestDifficulty(tx.to)
+          targetDifficulty = await web3.eth.suggestDifficulty(tx.from)
         }
 
-        if (!tx.nonce && tx.nonce !== 0) {
-          tx.nonce = await web3.eth.getTransactionCount(tx.to)
+        if (!tx.nonce) {
+          tx.nonce = await web3.eth.getTransactionCount(tx.from)
         }
 
         if (!tx.gas) {
           tx.gas = await web3.eth.estimateGas(tx)
         }
+
+        // web3.js passes gasPrice as a number, ebakus doesn't need it so it zeroes it
+        tx.gasPrice = '0'
 
         tx = web3.extend.formatters.inputCallFormatter(tx)
 

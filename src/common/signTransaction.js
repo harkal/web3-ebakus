@@ -38,8 +38,7 @@ const setWeb3Provider = provider => {
  * @callback callback callback(error, result)
  * @returns {Promise<Object>}
  */
-const signTransaction = (tx, privateKey, callback) => {
-  const _this = this
+const signTransaction = async (tx, privateKey, callback) => {
   let error = false
   let result
 
@@ -52,13 +51,12 @@ const signTransaction = (tx, privateKey, callback) => {
     return Promise.reject(error)
   }
 
-  function signed(tx) {
-    if (!tx.gas && !tx.gasLimit) {
-      error = new Error('gas is missing')
-    }
+  // web3.js passes gasPrice as a number, ebakus doesn't need it so it zeroes it
+  tx.gasPrice = '0'
 
+  function signed(tx) {
     if (tx.nonce < 0 || tx.gas < 0 || tx.workNonce < 0 || tx.chainId < 0) {
-      error = new Error('Gas, gasPrice, nonce or chainId is lower than 0')
+      error = new Error('Nonce, gas, workNonce or chainId is lower than 0')
     }
 
     if (error) {
@@ -67,10 +65,7 @@ const signTransaction = (tx, privateKey, callback) => {
     }
 
     try {
-      const transaction = web3.extend.formatters.inputCallFormatter({
-        ...tx,
-        gasPrice: '0', // web3.js passes gasPrice as a number, ebakus doesn't need it so it '0' it
-      })
+      const transaction = web3.extend.formatters.inputCallFormatter(tx)
       transaction.to = transaction.to || '0x'
       transaction.data = transaction.data || '0x'
       transaction.value = transaction.value || '0x'
@@ -122,29 +117,39 @@ const signTransaction = (tx, privateKey, callback) => {
     return result
   }
 
-  // Resolve immediately if nonce, chainId and price are provided
-  if (tx.nonce !== undefined && tx.chainId !== undefined) {
+  // Resolve immediately if nonce, gas, workNonce and chainId are provided
+  if (
+    tx.nonce !== undefined &&
+    tx.gas !== undefined &&
+    tx.workNonce !== undefined &&
+    tx.chainId !== undefined
+  ) {
     return Promise.resolve(signed(tx))
   }
 
-  // Otherwise, get the missing info from the Ethereum Node
+  const from = web3.eth.accounts.privateKeyToAccount(privateKey).address
+
+  // Otherwise, get the missing info from the Ebakus Node
   return Promise.all([
-    isNot(tx.chainId) ? web3.eth.net.getId() : tx.chainId,
-    isNot(tx.nonce)
-      ? web3.eth.getTransactionCount(
-          web3.eth.accounts.privateKeyToAccount(privateKey).address
-        )
-      : tx.nonce,
-  ]).then(args => {
-    if (isNot(args[0]) || isNot(args[1])) {
+    isNot(tx.nonce) ? web3.eth.getTransactionCount(from) : tx.nonce,
+    isNot(tx.gas) ? web3.eth.estimateGas(tx) : tx.gas,
+    isNot(tx.workNonce)
+      ? web3.eth.calculateWorkForTransaction({ ...tx, from })
+      : tx,
+    isNot(tx.chainId) ? web3.eth.getChainId() : tx.chainId,
+  ]).then(([nonce, gas, { workNonce }, chainId]) => {
+    if (isNot(nonce) || isNot(gas) || isNot(workNonce) || isNot(chainId)) {
       throw new Error(
-        `One of the values 'chainId', or 'nonce' couldn't be fetched: ${JSON.stringify(
-          args
-        )}`
+        `One of the values 'nonce=${nonce}', 'gas=${gas}', 'workNonce=${workNonce}' or 'chainId=${chainId}' couldn't be fetched`
       )
     }
-
-    return signed({ ...tx, chainId: args[0], nonce: args[1] })
+    return signed({
+      ...tx,
+      nonce,
+      gas,
+      workNonce,
+      chainId,
+    })
   })
 }
 
