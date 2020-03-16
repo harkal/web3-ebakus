@@ -135,6 +135,19 @@ web3.eth
   .then(abi => console.log(JSON.parse(abi)))
 ```
 
+### web3.eth.getStaked(accountAddress, blockNumber)
+
+The `getStaked` returns the staked amount for an account.
+
+- `accountAddress`: the account address.
+- `blockNumber`: block number from which to read the staked amount. You can use `latest` string for fetching from latest block.
+
+```js
+web3.eth
+  .getStaked(accountAddress, 'latest')
+  .then(staked => console.log('Staked amount is: ' + staked / 10000))
+```
+
 ### web3.db.select(contractAddress, tableName, whereCondition, orderByColumn, blockNumber)
 
 The `db.select` allows performing selects with conditions ordered by column name.

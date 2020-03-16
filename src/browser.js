@@ -277,6 +277,15 @@ const ebakus = web3 => {
         params: 1,
         inputFormatter: [web3.utils.inputAddressFormatter],
       },
+      {
+        name: 'getStaked',
+        call: 'eth_getStaked',
+        params: 2,
+        inputFormatter: [
+          web3.utils.inputAddressFormatter,
+          web3.utils.inputBlockNumberFormatter,
+        ],
+      },
     ],
   })
 
