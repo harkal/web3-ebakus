@@ -289,6 +289,12 @@ const ebakus = web3 => {
         inputFormatter: [web3.utils.toChecksumAddress],
         outputFormatter: web3.utils.toFloat,
       },
+      {
+        name: 'getAbiForAddress',
+        call: 'eth_getAbiForAddress',
+        params: 1,
+        inputFormatter: [web3.utils.inputAddressFormatter],
+      },
     ],
   })
 
