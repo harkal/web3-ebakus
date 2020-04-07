@@ -9,12 +9,7 @@ import '@babel/polyfill'
 import { inherits } from 'util'
 import Subprovider from 'web3-provider-engine/subproviders/subprovider'
 
-let Web3Ebakus
-if (process.env.TARGET === 'web') {
-  Web3Ebakus = require('./browser').default
-} else {
-  Web3Ebakus = require('./index').default
-}
+import Web3Ebakus from './index'
 
 const defaultOptions = {
   defaultTargetDifficulty: null,

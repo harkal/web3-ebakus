@@ -1,18 +1,6 @@
-const wasmSupported = (() => {
-  try {
-    if (
-      typeof WebAssembly === 'object' &&
-      typeof WebAssembly.instantiate === 'function'
-    ) {
-      const module = new WebAssembly.Module(
-        Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00)
-      )
-      if (module instanceof WebAssembly.Module)
-        return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
-    }
-  } catch (e) {}
-  return false
-})()
+const isHexStrict = hex =>
+  (typeof hex === 'string' || typeof hex === 'number') &&
+  /^(-)?0x[0-9a-f]*$/i.test(hex)
 
 const hex2uint8 = (buffer, s, byteOffset) => {
   let result = new Uint8Array(buffer, byteOffset, s.length / 2)
@@ -22,4 +10,4 @@ const hex2uint8 = (buffer, s, byteOffset) => {
   return result
 }
 
-export { wasmSupported, hex2uint8 }
+export { isHexStrict, hex2uint8 }

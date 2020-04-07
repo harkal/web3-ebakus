@@ -59,6 +59,25 @@ const getOptimization = target => {
   }
 }
 
+const getPlugins = target => {
+  if (target === 'web') {
+    return [
+      new webpack.DefinePlugin({
+        'process.env.TARGET': JSON.stringify('web'),
+      }),
+    ]
+  } else if (target === 'node') {
+    return [
+      new webpack.ProvidePlugin({
+        Worker: ['worker_threads', 'Worker'],
+      }),
+      new webpack.DefinePlugin({
+        'process.env.TARGET': JSON.stringify('node'),
+      }),
+    ]
+  }
+}
+
 /*
  * Common configuration chunk to be used for both
  * client-side and server-side bundles
@@ -66,6 +85,9 @@ const getOptimization = target => {
 
 const baseConfig = {
   mode: NODE_ENV,
+  entry: {
+    'web3-ebakus': './src/index.js',
+  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'lib'),
@@ -108,15 +130,13 @@ const browserConfig = {
   node: {
     fs: 'empty',
   },
-  entry: {
-    'web3-ebakus': './src/browser.js',
-  },
   output: {
     filename: '[name].browser.min.js',
   },
   devServer: {
     contentBase: ['./example', './lib'],
   },
+  plugins: getPlugins('web'),
   optimization: getOptimization('web'),
 }
 
@@ -124,9 +144,6 @@ const clientConfig = {
   target: 'web',
   node: {
     fs: 'empty',
-  },
-  entry: {
-    'web3-ebakus': './src/browser.js',
   },
   output: {
     filename: '[name].browser.esm.js',
@@ -139,19 +156,12 @@ const clientConfig = {
   devServer: {
     contentBase: ['./example', './lib'],
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env.TARGET': JSON.stringify('web'),
-    }),
-  ],
+  plugins: getPlugins('web'),
   optimization: getOptimization('web'),
 }
 
 const serverConfig = {
   target: 'node',
-  entry: {
-    'web3-ebakus': './src/index.js',
-  },
   output: {
     filename: '[name].node.js',
   },
@@ -160,14 +170,7 @@ const serverConfig = {
       whitelist: ['web3', 'eth-lib'],
     }),
   ],
-  plugins: [
-    new webpack.ProvidePlugin({
-      Worker: ['worker_threads', 'Worker'],
-    }),
-    new webpack.DefinePlugin({
-      'process.env.TARGET': JSON.stringify('node'),
-    }),
-  ],
+  plugins: getPlugins('node'),
   optimization: getOptimization('node'),
 }
 
@@ -181,18 +184,20 @@ const web3SubproviderClientConfig = {
   },
   output: {
     filename: '[name].web3-subprovider.esm.js',
+    library: {
+      root: 'Web3EbakusSubprovider',
+      amd: 'web3-ebakus-subprovider',
+      commonjs: 'web3-ebakus-subprovider',
+    },
   },
   externals: [
     nodeExternals({
       whitelist: ['web3'],
     }),
   ],
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env.TARGET': JSON.stringify('web'),
-    }),
-  ],
+  plugins: getPlugins('web'),
   optimization: getOptimization('web'),
+  // optimization: { minimize: false },
 }
 
 const web3SubproviderServerConfig = {
@@ -202,20 +207,70 @@ const web3SubproviderServerConfig = {
   },
   output: {
     filename: '[name].web3-subprovider.node.js',
+    library: {
+      root: 'Web3EbakusSubprovider',
+      amd: 'web3-ebakus-subprovider',
+      commonjs: 'web3-ebakus-subprovider',
+    },
   },
   externals: [
     nodeExternals({
       whitelist: ['web3', 'eth-lib'],
     }),
   ],
-  plugins: [
-    new webpack.ProvidePlugin({
-      Worker: ['worker_threads', 'Worker'],
-    }),
-    new webpack.DefinePlugin({
-      'process.env.TARGET': JSON.stringify('node'),
+  plugins: getPlugins('node'),
+  optimization: getOptimization('node'),
+}
+
+const ebakusPoWClientConfig = {
+  target: 'web',
+  node: {
+    fs: 'empty',
+  },
+  entry: {
+    'ebakus-pow': './src/web/proofOfWork.js',
+  },
+  output: {
+    filename: '[name].esm.js',
+    library: {
+      root: 'EbakusPoW',
+      amd: 'ebakus-pow',
+      commonjs: 'ebakus-pow',
+    },
+    libraryExport: 'createCalculateWorkForTransaction',
+  },
+  externals: [
+    nodeExternals({
+      whitelist: ['web3'],
     }),
   ],
+  devServer: {
+    contentBase: ['./example', './lib'],
+  },
+  plugins: getPlugins('web'),
+  optimization: getOptimization('web'),
+}
+
+const ebakusPoWServerConfig = {
+  target: 'node',
+  entry: {
+    'ebakus-pow': './src/node/proofOfWork.js',
+  },
+  output: {
+    filename: '[name].node.js',
+    library: {
+      root: 'EbakusPoW',
+      amd: 'ebakus-pow',
+      commonjs: 'ebakus-pow',
+    },
+    libraryExport: 'createCalculateWorkForTransaction',
+  },
+  externals: [
+    nodeExternals({
+      whitelist: ['web3', 'eth-lib'],
+    }),
+  ],
+  plugins: getPlugins('node'),
   optimization: getOptimization('node'),
 }
 
@@ -225,4 +280,6 @@ module.exports = [
   merge(baseConfig, serverConfig),
   merge(baseConfig, web3SubproviderClientConfig),
   merge(baseConfig, web3SubproviderServerConfig),
+  merge(baseConfig, ebakusPoWClientConfig),
+  merge(baseConfig, ebakusPoWServerConfig),
 ]
