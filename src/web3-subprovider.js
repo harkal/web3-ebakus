@@ -27,26 +27,50 @@ export default function CalculateWorkNonce(opts) {
   this.defaultTargetDifficulty = defaultTargetDifficulty
 }
 
-CalculateWorkNonce.prototype.handleRequest = function(payload, next, end) {
-  const { method } = payload
-  if (method === 'eth_signTransaction' || method === 'eth_sendTransaction') {
-    const txParams = payload.params[0]
+CalculateWorkNonce.prototype.handleRequest = async function(
+  payload,
+  next,
+  end
+) {
+  switch (payload.method) {
+    case 'eth_sendTransaction':
+    case 'eth_signTransaction':
+      const txParams = payload.params[0]
 
-    if (!txParams.workNonce) {
-      this.web3.eth
-        .calculateWorkForTransaction(
-          txParams,
-          this.defaultTargetDifficulty,
-          null
-        )
-        .then(tx => {
+      if (!txParams.workNonce) {
+        try {
+          const txWithPoW = await this.web3.eth.calculateWorkForTransaction(
+            txParams,
+            this.defaultTargetDifficulty,
+            null
+          )
+
+          const workNonce = txWithPoW.workNonce
+
+          // mutate the params
+          payload.params[0].workNonce = workNonce
+
           // hack as most existing libraries don't know how to use/pass over workNonce
-          tx.gasPrice = tx.workNonce
-          next(null, tx)
-        })
-        .catch(err => end(err))
+          payload.params[0].gasPrice = workNonce
+        } catch (err) {
+          end(err)
+          return
+        }
+      }
+
+      next()
       return
-    }
+
+    // TODO: better handle of racing conditions in truffle migrate
+    //   we have to examine where the racing condition occurs
+    case 'eth_getTransactionReceipt':
+      setTimeout(() => {
+        next()
+      }, 1500)
+      return
+
+    default:
+      next()
+      return
   }
-  next()
 }
