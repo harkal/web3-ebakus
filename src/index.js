@@ -4,7 +4,6 @@
  * @author Chris Ziogas <chris@ebakus.com>
  * @date 2018
  */
-import '@babel/polyfill'
 
 import signTransaction, {
   setWeb3Provider as signTransactionSetWeb3Provider,

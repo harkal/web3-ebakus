@@ -4,7 +4,6 @@
  * @author Chris Ziogas <chris@ebakus.com>
  * @date 2020
  */
-import '@babel/polyfill'
 
 import { inherits } from 'util'
 import Subprovider from 'web3-provider-engine/subproviders/subprovider'
