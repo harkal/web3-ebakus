@@ -31,9 +31,10 @@
     "pow"
   ],
   "dependencies": {
-    "@babel/polyfill": "^7.4.4",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/runtime": "^7.9.2",
     "clz-buffer": "^1.0.0",
-    "core-js": "2",
+    "core-js": "^3.6.5",
     "eth-lib": "0.2.8",
     "wasm-feature-detect": "^1.2.3",
     "web3-provider-engine": "^15.0.6",
@@ -45,7 +46,8 @@
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
     "@babel/register": "^7.0.0",
     "babel-loader": "^8.0.4",
     "clean-webpack-plugin": "^1.0.0",

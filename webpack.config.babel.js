@@ -85,9 +85,6 @@ const getPlugins = target => {
 
 const baseConfig = {
   mode: NODE_ENV,
-  entry: {
-    'web3-ebakus': './src/index.js',
-  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'lib'),
@@ -130,6 +127,9 @@ const browserConfig = {
   node: {
     fs: 'empty',
   },
+  entry: {
+    'web3-ebakus': './src/index.js',
+  },
   output: {
     filename: '[name].browser.min.js',
   },
@@ -144,6 +144,9 @@ const clientConfig = {
   target: 'web',
   node: {
     fs: 'empty',
+  },
+  entry: {
+    'web3-ebakus': './src/index.js',
   },
   output: {
     filename: '[name].browser.esm.js',
@@ -162,6 +165,9 @@ const clientConfig = {
 
 const serverConfig = {
   target: 'node',
+  entry: {
+    'web3-ebakus': './src/index.js',
+  },
   output: {
     filename: '[name].node.js',
   },
