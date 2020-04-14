@@ -65,7 +65,7 @@ CalculateWorkNonce.prototype.handleRequest = async function(
     case 'eth_getTransactionReceipt':
       setTimeout(() => {
         next()
-      }, 1500)
+      }, 2000)
       return
 
     default:
