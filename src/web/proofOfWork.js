@@ -7,7 +7,6 @@
 
 import Bytes from 'eth-lib/lib/bytes'
 import RLP from 'eth-lib/lib/rlp'
-import { threads as hasThreadsSupport } from 'wasm-feature-detect'
 
 import Worker from 'worker-loader?inline&name=[name].[ext]!./proofOfWork.web.worker.js'
 
@@ -34,15 +33,6 @@ const createCalculateWorkForTransaction = (opts = {}) => {
     let error = false
 
     callback = callback || (() => {})
-
-    if (!(await hasThreadsSupport())) {
-      error = new Error(
-        "Wasm is not supported by browser. PoW function can't load."
-      )
-
-      callback(error)
-      return Promise.reject(error)
-    }
 
     if (!tx) {
       error = new Error('No transaction object given!')
@@ -192,15 +182,6 @@ const benchmarkWorkCallsPerSecond = async callback => {
   let error = false
 
   callback = callback || (() => {})
-
-  if (!(await hasThreadsSupport())) {
-    error = new Error(
-      "Wasm is not supported by browser. PoW function can't load."
-    )
-
-    callback(error)
-    return Promise.reject(error)
-  }
 
   const benchmarkCallsPerSecond = async () => {
     let worker

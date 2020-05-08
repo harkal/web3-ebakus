@@ -36,7 +36,6 @@
     "clz-buffer": "^1.0.0",
     "core-js": "^3.6.5",
     "eth-lib": "0.2.8",
-    "wasm-feature-detect": "^1.2.3",
     "web3-provider-engine": "^15.0.6",
     "worker-loader": "^2.0.0"
   },
